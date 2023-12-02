@@ -1,8 +1,9 @@
 import { useSelector } from "react-redux";
-import { selectInvoiceList } from "./invoicesSlice";
+import { selectBulkList, selectInvoiceList } from "./invoicesSlice";
 
 export const useInvoiceListData = () => {
   const invoiceList = useSelector(selectInvoiceList);
+  const bulkList = useSelector(selectBulkList);
 
   const getOneInvoice = (receivedId) => {
     return (
@@ -16,6 +17,7 @@ export const useInvoiceListData = () => {
 
   return {
     invoiceList,
+    bulkList,
     getOneInvoice,
     listSize,
   };

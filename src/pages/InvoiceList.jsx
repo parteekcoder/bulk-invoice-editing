@@ -7,12 +7,14 @@ import InvoiceModal from "../components/InvoiceModal";
 import { useNavigate } from "react-router-dom";
 import { useInvoiceListData } from "../redux/hooks";
 import { useDispatch } from "react-redux";
-import { deleteInvoice } from "../redux/invoicesSlice";
+import { addBulkInvoice, deleteInvoice } from "../redux/invoicesSlice";
 
 const InvoiceList = () => {
   const { invoiceList, getOneInvoice } = useInvoiceListData();
   const isListEmpty = invoiceList.length === 0;
   const [copyId, setCopyId] = useState("");
+  const [bulkEditList, setBulkEditList] = useState([]);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const handleCopyClick = () => {
     const invoice = getOneInvoice(copyId);
@@ -22,6 +24,12 @@ const InvoiceList = () => {
       navigate(`/create/${copyId}`);
     }
   };
+
+  const handleBulkEditClick = (event) => {
+    event.preventDefault();
+    dispatch(addBulkInvoice(bulkEditList));
+    navigate('/bulkEdit')
+  }
 
   return (
     <Row>
@@ -41,6 +49,9 @@ const InvoiceList = () => {
                 <h3 className="fw-bold pb-2 pb-md-4">Invoice List</h3>
                 <Link to="/create">
                   <Button variant="primary mb-2 mb-md-4">Create Invoice</Button>
+                </Link>
+                <Link to="/bulkEdit">
+                  <Button variant="primary mb-2 mb-md-4" onClick={handleBulkEditClick}>Bulk Edit</Button>
                 </Link>
 
                 <div className="d-flex gap-2">
@@ -67,7 +78,9 @@ const InvoiceList = () => {
                     <th>Bill To</th>
                     <th>Due Date</th>
                     <th>Total Amt.</th>
+                    <th>Bulk Edit</th>
                     <th>Actions</th>
+
                   </tr>
                 </thead>
                 <tbody>
@@ -76,6 +89,7 @@ const InvoiceList = () => {
                       key={invoice.id}
                       invoice={invoice}
                       navigate={navigate}
+                      setBulkEditList={setBulkEditList}
                     />
                   ))}
                 </tbody>
@@ -88,14 +102,25 @@ const InvoiceList = () => {
   );
 };
 
-const InvoiceRow = ({ invoice, navigate }) => {
+const InvoiceRow = ({ invoice, navigate, setBulkEditList }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dispatch = useDispatch();
 
   const handleDeleteClick = (invoiceId) => {
     dispatch(deleteInvoice(invoiceId));
   };
-
+  const handleCheck = (event, invoice) => {
+  
+    if(event.target.checked){
+      setBulkEditList(prev => {
+        return [...prev,invoice];
+      });
+    }else{
+      return setBulkEditList(prev => {
+        return prev.filter((row) => row.id!==invoice.id)
+      })
+    }
+  }
   const handleEditClick = () => {
     navigate(`/edit/${invoice.id}`);
   };
@@ -117,6 +142,11 @@ const InvoiceRow = ({ invoice, navigate }) => {
       <td className="fw-normal">
         {invoice.currency}
         {invoice.total}
+      </td>
+      <td style={{ width: "5%" }}>
+          <div className="d-flex align-items-center justify-content-center gap-2" >
+            <input type="checkbox" style={{width: '30px'}} onClick={(e)=> handleCheck(e,invoice)}/>
+          </div>
       </td>
       <td style={{ width: "5%" }}>
         <Button variant="outline-primary" onClick={handleEditClick}>

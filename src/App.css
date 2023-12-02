@@ -58,6 +58,7 @@ hr {
 }
 .table td {
   text-align: left;
+  margin: 2px;
 }
 .table tr th:first-child,
 .table tr td:first-child {
